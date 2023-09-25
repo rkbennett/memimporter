@@ -18,6 +18,19 @@ At some point during the process of furiously googling and banging my head again
 
 I ended up turning me focus back to a tool I had tried using earlier in my reseach, [sRDI](https://github.com/monoxgas/sRDI). Using sRDI with my newly compiled (self-loading) memimporter, I ended up with some position independant shellcode to try. Using the usual windll api calls I was able to write the dll to memory and cast it as a function. The simple execution of this function results in the addition of memimporter to the python builtins. For a working code example check out my [py3memimporter](https://github.com/rkbennett/py3memimporter) repo, and for those that were waiting for the explanation of how I did it, sorry for the delay.
 
+## How to do this mamba jamba
+
+- `cd` into repo directory
+- run `python ./setup.py build` to build binary
+- `cd` into the `./build` directory
+- `cd` into the subdirectory that begins with `lib`
+- start a python interactive shell via `python`
+- import functions from ShellcodeRDI `from ShellcodeRDI import *` (https://github.com/monoxgas/sRDI)
+- read the generated _memimport pyd `dll = open("_memimporter.cp310-win_amd64.pyd", 'rb').read()` (file name may vary, check the file name in the current directory)
+- generate the PIC shellcode `shellcode = ConvertToShellcode(dll)`
+- convert the resulting shellcode to a python bytes object
+- this bytes object can be pasted into the py3memimport script to replace the existing `buf` bytes variable
+
 ## Final thoughts
 
 I'm pretty sure this method could be used for nearly any pyd file in python. Haven't tried any others, but hopefully I'll have planted the seed for someone else to try other ones.
