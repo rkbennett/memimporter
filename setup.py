@@ -39,7 +39,7 @@ if 0:
     extra_link_args.append("/DEBUG")
     macros.append(("VERBOSE", "1"))
 
-_memimporter = Extension("_memimporter",
+_init = Extension("_memimporter",
                          ["source/_memimporter.c",
                           "source/MemoryModule.c",
                           "source/MyLoadLibrary.c",
