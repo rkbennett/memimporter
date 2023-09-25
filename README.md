@@ -29,7 +29,7 @@ I ended up turning me focus back to a tool I had tried using earlier in my resea
 - read the generated _memimport pyd `dll = open("_memimporter.cp310-win_amd64.pyd", 'rb').read()` (file name may vary, check the file name in the current directory)
 - generate the PIC shellcode `shellcode = ConvertToShellcode(dll)`
 - convert the resulting shellcode to a python bytes object
-- this bytes object can be pasted into the py3memimport script to replace the existing `buf` bytes variable
+- this bytes object can be pasted into the [py3memimport](https://github.com/rkbennett/py3memimporter) script to replace the existing `buf` bytes variable
 
 ## Final thoughts
 
