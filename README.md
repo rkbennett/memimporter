@@ -46,3 +46,5 @@ I'm pretty sure this method could be used for nearly any pyd file in python. Hav
 [natesubra](https://github.com/natesubra) for pushing me to learn more of this stuff
 
 [monoxgas](https://github.com/monoxgas) for the sRDI project which got me across the finish line
+
+[DaWouw](https://github.com/DaWouw) for the sRDI python fork that fixes hung execution
