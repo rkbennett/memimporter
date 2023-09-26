@@ -25,7 +25,7 @@ I ended up turning me focus back to a tool I had tried using earlier in my resea
 - `cd` into the `./build` directory
 - `cd` into the subdirectory that begins with `lib`
 - start a python interactive shell via `python`
-- import functions from ShellcodeRDI `from ShellcodeRDI import *` (https://github.com/monoxgas/sRDI)
+- import functions from [ShellcodeRDI](https://github.com/DaWouw/sRDI/blob/master/Python/ShellcodeRDI.py) - `from ShellcodeRDI import *`
 - read the generated _memimport pyd `dll = open("_memimporter.cp310-win_amd64.pyd", 'rb').read()` (file name may vary, check the file name in the current directory)
 - generate the PIC shellcode `shellcode = ConvertToShellcode(dll)`
 - convert the resulting shellcode to a python bytes object
