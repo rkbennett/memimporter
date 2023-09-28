@@ -16,7 +16,7 @@ At some point during the process of furiously googling and banging my head again
 
 ## sRDI to inject
 
-I ended up turning me focus back to a tool I had tried using earlier in my reseach, [sRDI](https://github.com/monoxgas/sRDI). Using sRDI with my newly compiled (self-loading) memimporter, I ended up with some position independant shellcode to try. Using the usual windll api calls I was able to write the dll to memory and cast it as a function. The simple execution of this function results in the addition of memimporter to the python builtins. For a working code example check out my [py3memimporter](https://github.com/rkbennett/py3memimporter) repo, and for those that were waiting for the explanation of how I did it, sorry for the delay.
+I ended up turning my focus back to a tool I had tried using earlier in my reseach, [sRDI](https://github.com/monoxgas/sRDI). Using sRDI with my newly compiled (self-loading) memimporter, I ended up with some position independant shellcode to try. Using the usual windll api calls I was able to write the dll to memory and cast it as a function. The simple execution of this function results in the addition of memimporter to the python builtins. For a working code example check out my [py3memimporter](https://github.com/rkbennett/py3memimporter) repo, and for those that were waiting for the explanation of how I did it, sorry for the delay.
 
 ## How to do this mamba jamba
 
