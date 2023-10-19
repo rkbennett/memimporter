@@ -3,9 +3,9 @@
 
 HMODULE MyLoadLibrary(LPCSTR, void *, size_t, void *);
 
-HMODULE MyDlopen(unsigned char *, size_t);
-
 HMODULE MyGetModuleHandle(LPCSTR);
+
+HMODULE MyDlopen(unsigned char *, size_t);
 
 BOOL MyFreeLibrary(HMODULE);
 

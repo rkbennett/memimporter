@@ -208,7 +208,6 @@ HMODULE MyLoadLibrary(LPCSTR name, void *bytes, size_t size, void *userdata)
 {
 	if (userdata) {
 		HCUSTOMMODULE mod = _LoadLibrary(name, userdata);
-		dprintf("MyLoadLibrary-userdata(%s) -> %p\n\n", name, mod);
 		if (mod)
 			return mod;
 	} else if (bytes) {
@@ -218,7 +217,6 @@ HMODULE MyLoadLibrary(LPCSTR name, void *bytes, size_t size, void *userdata)
 							_GetProcAddress,
 							_FreeLibrary,
 							userdata);
-		dprintf("MyLoadLibrary-bytes(%s) -> %p\n\n", bytes, mod);
 		if (mod) {
 			LIST *lib = _AddMemoryModule(name, mod);
 			return lib->module;
@@ -265,7 +263,7 @@ FARPROC MyGetProcAddress(HMODULE module, LPCSTR procname)
 	else {
 		SetLastError(0);
 		proc = GetProcAddress(module, procname);
-		if (proc == &GetModuleHandleExW)
+		if (proc == (FARPROC)&GetModuleHandleExW)
 			proc = (FARPROC)MyGetModuleHandleExW;
 	}
 	return proc;

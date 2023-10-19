@@ -1,7 +1,6 @@
 // Need to define these to be able to use SetDllDirectory.
 #define _WIN32_WINNT 0x0502
 #define NTDDI_VERSION 0x05020000
-#define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include <windows.h>
 
@@ -30,6 +29,14 @@ static int dprintf(char *fmt, ...)
 }
 */
 
+#if (PY_VERSION_HEX >= 0x030C0000)
+
+#include "_memimporter.h"
+
+static PyObject *uid_name;
+
+#endif
+
 #if (PY_VERSION_HEX >= 0x03030000)
 
 /* Magic for extension modules (built-in as well as dynamically
@@ -56,14 +63,20 @@ int do_import(FARPROC init_func, char *modname, PyObject *spec, PyObject **mod)
 	PyObject* (*p)(void);
 	PyObject *m = NULL;
 	struct PyModuleDef *def;
+	#if (PY_VERSION_HEX >= 0x030C0000)
+	PyModuleObject *mo;
+	#elif (PY_VERSION_HEX < 0x03070000)
 	char *oldcontext;
+	#else
+	const char *oldcontext;
+	#endif
 	PyObject *name = PyUnicode_FromString(modname);
 
 	if (name == NULL)
 		return -1;
 
-	m = _PyImport_FindExtensionObject(name, name);
-	if (m != NULL) {
+	PyObject *modules = PyImport_GetModuleDict();
+	if (PyMapping_HasKeyString(modules, (const char *)name)) {
 		Py_DECREF(name);
 		return 0;
 	}
@@ -80,13 +93,22 @@ int do_import(FARPROC init_func, char *modname, PyObject *spec, PyObject **mod)
 		return -1;
 	}
 
-        oldcontext = _Py_PackageContext;
+
+	#if (PY_VERSION_HEX < 0x030C0000)
+
+	oldcontext = _Py_PackageContext;
 	_Py_PackageContext = modname;
+
+	#endif
 
 	p = (PyObject*(*)(void))init_func;
 	m = (*p)();
 
+	#if (PY_VERSION_HEX < 0x030C0000)
+
 	_Py_PackageContext = oldcontext;
+
+	#endif
 
 
 	if (PyErr_Occurred()) {
@@ -118,10 +140,40 @@ int do_import(FARPROC init_func, char *modname, PyObject *spec, PyObject **mod)
 	}
 	def->m_base.m_init = p;
 
+	#if (PY_VERSION_HEX >= 0x030C0000)
+
+	/* a hack instead of _PyImport_SwapPackageContext & _PyImport_ResolveNameWithPackageContext
+
+	   Origin:
+	     _PyImport_SwapPackageContext()
+	     call <module init func>
+	       <module init func> -> PyModule_Create() -> PyModule_Create2() -> PyModule_CreateInitialized()
+	         PyModule_CreateInitialized() -> _PyImport_ResolveNameWithPackageContext()
+	         PyModule_CreateInitialized() -> PyModule_New() -> PyModule_NewObject() -> module_init_dict()
+	           module_init_dict(): set <module attribute __name__>
+	           module_init_dict(): set <module struct member md_name>
+	     _PyImport_SwapPackageContext()
+
+	   Hack:
+	     call <module init func>
+	       ...
+	     re-set <module attribute __name__>
+	     re-set <module struct member md_name>
+	*/
+	mo = (PyModuleObject *)m;
+	if (strcmp(PyUnicode_AsUTF8(mo->md_name), modname) != 0) {
+		if (PyDict_SetItem(mo->md_dict, uid_name, name) != 0) {
+			Py_DECREF(name);
+			return -1;
+		}
+		Py_XDECREF(mo->md_name);
+		Py_XSETREF(mo->md_name, Py_NewRef(name));
+	}
+
+	#endif
+
     #if (PY_VERSION_HEX >= 0x03070000)
 
-    PyObject *modules = NULL;
-    modules = PyImport_GetModuleDict();
     res = _PyImport_FixupExtensionObject(m, name, name, modules);
 
     #else
@@ -159,7 +211,6 @@ dlopen(PyObject *self, PyObject *args)
 }
 //dlopen shiz
 
-
 static PyObject *
 import_module(PyObject *self, PyObject *args)
 {
@@ -172,7 +223,9 @@ import_module(PyObject *self, PyObject *args)
 	ULONG_PTR cookie = 0;
 	PyObject *findproc;
 	PyObject *spec;
+	#ifndef STANDALONE
 	BOOL res;
+	#endif
 
 	int imp_res = -1;
 	struct PyModuleDef *def;
@@ -226,8 +279,10 @@ import_module(PyObject *self, PyObject *args)
 	#endif
 
 	hmem = MyLoadLibrary(pathname, NULL, 0, findproc);
+	#ifndef STANDALONE
 	if (res)
 		SetDllDirectory(NULL); // restore the default dll directory search path
+	#endif
 	_My_DeactivateActCtx(cookie);
 
 	if (!hmem) {
@@ -278,14 +333,20 @@ import_module(PyObject *self, PyObject *args)
 static PyObject *
 get_verbose_flag(PyObject *self, PyObject *args)
 {
+	#if (PY_VERSION_HEX >= 0x030C0000)
+
+	return PyLong_FromLong(_Py_GetConfig()->verbose);
+
+	#else
+
 	return PyLong_FromLong(Py_VerboseFlag);
+
+	#endif
 }
 
 static PyMethodDef methods[] = {
 	{ "import_module", import_module, METH_VARARGS,
 	  "import_module(modname, pathname, initfuncname, finder, spec) -> module" },
-	{ "dlopen", dlopen, METH_VARARGS,
-	  "replaces dlopen functionality"},
 	{ "get_verbose_flag", get_verbose_flag, METH_NOARGS,
 	  "Return the Py_Verbose flag" },
 	{ NULL, NULL },		/* Sentinel */
@@ -303,10 +364,17 @@ static struct PyModuleDef moduledef = {
 	NULL, /* m_free */
 };
 
+
 PyMODINIT_FUNC PyInit__memimporter(void)
 {
+	#if (PY_VERSION_HEX >= 0x030C0000)
+
+	uid_name = PyUnicode_FromString("__name__");
+
+	#endif
+
 	return PyModule_Create(&moduledef);
-};
+}
 
 INT APIENTRY DllMain(HMODULE hModule,
     DWORD  ul_reason_for_call,
@@ -318,10 +386,6 @@ INT APIENTRY DllMain(HMODULE hModule,
     case DLL_PROCESS_ATTACH:
 		PyGILState_STATE gstate;
 		gstate = PyGILState_Ensure();
-        if (PyImport_AppendInittab("_memimporter", PyInit__memimporter) == -1) {
-            fprintf(stderr, "Error: could not extend in-built modules table\n");
-            exit(1);
-        }
 		Py_Initialize();
 		PyObject *Module = PyInit__memimporter();
 		PyObject *builtin_module = PyImport_ImportModule(builtin_name);
