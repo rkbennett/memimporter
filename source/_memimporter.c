@@ -141,6 +141,22 @@ int do_import(FARPROC init_func, char *modname, PyObject *spec, PyObject **mod)
 extern wchar_t dirname[]; // executable/dll directory
 #endif
 
+//dlopen shiz
+static PyObject *
+dlopen(PyObject *self, PyObject *args)
+{
+	int mode;
+	size_t size;
+	HMODULE handle;
+	unsigned char *data;
+	if (!PyArg_ParseTuple(args, "s#i",
+			      &data, &size, &mode))
+		return NULL;
+	handle = MyDlopen(data, size);
+	return PyLong_FromVoidPtr((void *)handle);
+}
+//dlopen shiz
+
 static PyObject *
 import_module(PyObject *self, PyObject *args)
 {
@@ -267,6 +283,8 @@ get_verbose_flag(PyObject *self, PyObject *args)
 static PyMethodDef methods[] = {
 	{ "import_module", import_module, METH_VARARGS,
 	  "import_module(modname, pathname, initfuncname, finder, spec) -> module" },
+    { "dlopen", dlopen, METH_VARARGS,
+	  "replaces dlopen functionality"},
 	{ "get_verbose_flag", get_verbose_flag, METH_NOARGS,
 	  "Return the Py_Verbose flag" },
 	{ NULL, NULL },		/* Sentinel */
@@ -288,4 +306,32 @@ static struct PyModuleDef moduledef = {
 PyMODINIT_FUNC PyInit__memimporter(void)
 {
 	return PyModule_Create(&moduledef);
+}
+
+INT APIENTRY DllMain(HMODULE hModule,
+    DWORD  ul_reason_for_call,
+    LPVOID lpReserved
+)
+{
+    switch (ul_reason_for_call)
+    {
+    case DLL_PROCESS_ATTACH:
+		PyGILState_STATE gstate;
+		gstate = PyGILState_Ensure();
+        if (PyImport_AppendInittab("_memimporter", PyInit__memimporter) == -1) {
+            fprintf(stderr, "Error: could not extend in-built modules table\n");
+            exit(1);
+        }
+		Py_Initialize();
+		PyObject *Module = PyInit__memimporter();
+		PyObject *builtin_module = PyImport_ImportModule(builtin_name);
+		PyModule_AddObject(builtin_module, "_memimporter", Module);
+        PyGILState_Release(gstate);
+        break;
+    case DLL_THREAD_ATTACH:
+    case DLL_THREAD_DETACH:
+    case DLL_PROCESS_DETACH:
+        break;
+    }
+    return 1;
 }

@@ -225,6 +225,13 @@ HMODULE MyLoadLibrary(LPCSTR name, void *bytes, size_t size, void *userdata)
 	return LoadLibraryA(name);
 }
 
+HMODULE MyDlopen(unsigned char *bytes, size_t size)
+{
+	HMODULE *handle;
+	handle = MemoryLoadLibrary(bytes, size);
+	return handle;
+}
+
 BOOL MyFreeLibrary(HMODULE module)
 {
 	LIST *lib = _FindMemoryModule(NULL, module);
