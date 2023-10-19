@@ -163,9 +163,9 @@ void PyErr_Print(void)
   proc();
 }
 
-void Py_SetProgramName(wchar_t *name)
+void Py_SetProgramName(const wchar_t *name)
 {
-  FUNC(void, Py_SetProgramName, (wchar_t *));
+  FUNC(void, Py_SetProgramName, (const wchar_t *));
   proc(name);
 }
 
@@ -305,6 +305,18 @@ PyObject *PyUnicode_FromString(const char *u)
   return proc(u);
 }
 
+#ifdef Py_REF_DEBUG
+
+Py_ssize_t _Py_RefTotal;
+
+void _Py_NegativeRefcount(const char *filename, int lineno, PyObject *op)
+{
+  FUNC(void, _Py_NegativeRefcount, (const char *, int, PyObject *));
+  proc(filename, lineno, op);
+}
+
+#endif
+
 #undef _Py_Dealloc
 
 void _Py_Dealloc(PyObject *op)
@@ -390,6 +402,65 @@ int _PyImport_FixupExtensionObject(PyObject *m, PyObject *a, PyObject *b)
 
 #endif
 
+int PyMapping_HasKeyString(PyObject *o, const char *key)
+{
+  FUNC(int, PyMapping_HasKeyString, (PyObject *, const char *));
+  return proc(o, key);
+}
+
+void PyConfig_InitIsolatedConfig(PyConfig *config)
+{
+  FUNC(void, PyConfig_InitIsolatedConfig, (PyConfig *));
+  proc(config);
+}
+
+PyStatus PyConfig_SetArgv(PyConfig *config, Py_ssize_t argc, wchar_t * const *argv)
+{
+  FUNC(PyStatus, PyConfig_SetArgv, (PyConfig *, Py_ssize_t , wchar_t * const *));
+  return proc(config, argc, argv);
+}
+
+PyStatus PyConfig_SetString(PyConfig *config, wchar_t **config_str, const wchar_t *str)
+{
+  FUNC(PyStatus, PyConfig_SetString, (PyConfig *, wchar_t **, const wchar_t *));
+  return proc(config, config_str, str);
+}
+
+void Py_ExitStatusException(PyStatus status)
+{
+  FUNC(void, Py_ExitStatusException, (PyStatus));
+  proc(status);
+}
+
+int PyStatus_Exception(PyStatus status)
+{
+  FUNC(int, PyStatus_Exception, (status));
+  return proc(status);
+}
+
+int PyStatus_IsExit(PyStatus status)
+{
+  FUNC(int, PyStatus_IsExit, (status));
+  return proc(status);
+}
+
+void PyConfig_Clear(PyConfig *config)
+{
+  FUNC(void, PyConfig_Clear, (PyConfig *));
+  proc(config);
+}
+
+PyStatus Py_InitializeFromConfig(const PyConfig *config)
+{
+  FUNC(PyStatus, Py_InitializeFromConfig, (const PyConfig *));
+  return proc(config);
+}
+
+PyStatus PyWideStringList_Append(PyWideStringList *list, const wchar_t *item)
+{
+  FUNC(PyStatus, PyWideStringList_Append, (PyWideStringList *, const wchar_t *));
+  return proc(list, item);
+}
 
 int PySys_SetObject(const char *name, PyObject *v)
 {
