@@ -6,6 +6,7 @@
 
 static char module_doc[] =
 "Importer which can load extension modules from memory";
+char builtin_name[] = "builtins";
 
 #include "MyLoadLibrary.h"
 #include "actctx.h"

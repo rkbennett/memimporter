@@ -5,7 +5,6 @@ import sys
 from importlib.machinery import EXTENSION_SUFFIXES
 from setuptools import setup, find_packages, Extension
 
-# Package imports
 if sys.version_info < (3, 9):
     python_dll_name = '\\"python%d%d.dll\\"' % sys.version_info[:2]
     python_dll_name_debug = '\\"python%d%d_d.dll\\"' % sys.version_info[:2]
