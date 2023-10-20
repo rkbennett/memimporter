@@ -37,7 +37,7 @@ I'm pretty sure this method could be used for nearly any pyd file in python. Hav
 
 ## Special Thanks
 
-[py2exe](https://github.com/py2exe) without you, there wouldn't be a memimporter module
+[SeaHOH](https://github.com/SeaHOH) without you, there wouldn't be a memimporter module
 
 [desty2k](https://github.com/desty2k) for the work you did to create a build file for a standalone memimporter
 
