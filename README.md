@@ -1,6 +1,6 @@
 # Memimporter
 
-memimporter is an implementation of the _memimporter package which is part of [py2exe](https://github.com/py2exe/py2exe). The build process (setup.py) was based on [paker](https://github.com/desty2k/paker)'s setup.py.
+memimporter is an implementation of the _memimporter package which is part of [py2exe](https://github.com/py2exe/py2exe) and maintained by [SeaHOH](https://github.com/SeaHOH) [here](https://github.com/SeaHOH/memimport). The build process (setup.py) was based on [paker](https://github.com/desty2k/paker)'s setup.py.
 
 ## Usage
 
